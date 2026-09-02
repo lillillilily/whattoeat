@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>랜덤 메뉴 추천</title>
+  <style>
+    body {
+      font-family: 'Pretendard', '맑은 고딕', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f8f9fa;
+    }
+    .card {
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+      text-align: center;
+      width: 320px;
+    }
+    h1 { color: #333; font-size: 24px; margin-bottom: 10px; }
+    p { color: #666; margin-bottom: 30px; }
+    #result {
+      font-size: 32px;
+      font-weight: 800;
+      color: #ff6b6b;
+      margin: 30px 0;
+      min-height: 48px;
+    }
+    button {
+      background-color: #4dabf7;
+      color: white;
+      border: none;
+      padding: 16px 32px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 12px;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.2s;
+    }
+    button:hover { background-color: #3bc9db; }
+    button:disabled { background-color: #ced4da; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>오늘 뭐 먹지? 🍽️</h1>
+    <p>버튼을 누르면 메뉴를 추천해 드립니다.</p>
+    <div id="result">대기 중...</div>
+    <button id="drawBtn" onclick="pickRandom()">메뉴 추천받기</button>
+  </div>
+
+  <script>
+    // 1단계에서 복사한 앱스 스크립트 웹 앱 URL을 아래에 넣으세요.
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxd1EkGj8k-Tr3isNXzZt3wuqlFTJa_I5xaRzu_Kh_Bojcrv9j-382i8kQSB3b0q9RW/exec';
+    let restaurantList = [];
+
+    // 페이지가 열리면 구글 시트에서 데이터를 미리 불러옵니다.
+    window.onload = async function() {
+      const resultDiv = document.getElementById('result');
+      const btn = document.getElementById('drawBtn');
+      
+      try {
+        resultDiv.innerText = '데이터 불러오는 중...';
+        btn.disabled = true;
+        
+        const response = await fetch(API_URL);
+        restaurantList = await response.json();
+        
+        resultDiv.innerText = '준비 완료!';
+        resultDiv.style.color = '#333';
+        btn.disabled = false;
+      } catch (error) {
+        resultDiv.innerText = '데이터 로드 실패 😢';
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    // 버튼을 누르면 배열에서 랜덤으로 하나를 뽑습니다.
+    function pickRandom() {
+      if (restaurantList.length === 0) return;
+      
+      const resultDiv = document.getElementById('result');
+      const randomIndex = Math.floor(Math.random() * restaurantList.length);
+      
+      // 약간의 애니메이션 효과 (빠르게 바뀌다가 멈춤)
+      let count = 0;
+      const btn = document.getElementById('drawBtn');
+      btn.disabled = true;
+      
+      const interval = setInterval(() => {
+        resultDiv.style.color = '#adb5bd';
+        resultDiv.innerText = restaurantList[Math.floor(Math.random() * restaurantList.length)];
+        count++;
+        
+        if (count > 10) {
+          clearInterval(interval);
+          resultDiv.style.color = '#ff6b6b';
+          resultDiv.innerText = restaurantList[randomIndex];
+          btn.disabled = false;
+        }
+      }, 50);
+    }
+  </script>
+</body>
+</html>
